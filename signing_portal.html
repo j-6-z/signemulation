@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAYISAAC AI AUTOMATION — Contractor Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0f172a;
+    --navy-mid: #1e293b;
+    --blue: #3b82f6;
+    --blue-light: #eff6ff;
+    --blue-mid: #dbeafe;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --white: #ffffff;
+    --success: #10b981;
+    --error: #ef4444;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f8fafc;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--navy);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    color: white;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+  }
+  .logo span { color: var(--blue); }
+  .badge {
+    background: var(--blue);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+  }
+  .progress-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    position: relative;
+  }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: calc(24px + 8px);
+    right: 0;
+    top: 12px;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+    transition: background 0.3s;
+  }
+  .step.done:not(:last-child)::after { background: var(--blue); }
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
+  }
+  .step.active .step-num { background: var(--blue); color: white; }
+  .step.done .step-num { background: var(--success); color: white; }
+  .step-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    white-space: nowrap;
+    display: none;
+  }
+  @media (min-width: 500px) { .step-label { display: block; } }
+  .step.active .step-label { color: var(--blue); }
+  .step.done .step-label { color: var(--success); }
+
+  /* ── Main ── */
+  main {
+    max-width: 720px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+  .card-sub {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* ── Form fields ── */
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .field-group.full { grid-template-columns: 1fr; }
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--navy-mid);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+  input, select {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: #fafbfc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    background: white;
+  }
+  input.error { border-color: var(--error); }
+
+  /* ── Document review ── */
+  .doc-list { display: flex; flex-direction: column; gap: 12px; }
+  .doc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: #fafbfc;
+    transition: border-color 0.2s;
+  }
+  .doc-item.reviewed { border-color: var(--success); background: #f0fdf4; }
+  .doc-left { display: flex; align-items: center; gap: 12px; }
+  .doc-icon {
+    width: 40px; height: 40px;
+    background: var(--blue-mid);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .doc-item.reviewed .doc-icon { background: #d1fae5; }
+  .doc-name { font-weight: 600; font-size: 0.88rem; color: var(--navy); }
+  .doc-desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .review-btn {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--blue);
+    color: var(--blue);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .review-btn:hover { background: var(--blue); color: white; }
+  .reviewed-badge {
+    display: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--success);
+    align-items: center;
+    gap: 4px;
+  }
+  .doc-item.reviewed .review-btn { display: none; }
+  .doc-item.reviewed .reviewed-badge { display: flex; }
+
+  /* ── Signature ── */
+  .sig-tabs { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .sig-tab {
+    padding: 7px 18px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .sig-tab.active { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+
+  #sig-canvas-wrap {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    position: relative;
+  }
+  #sig-canvas {
+    display: block;
+    width: 100%;
+    height: 140px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .canvas-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .sig-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .clear-btn {
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .clear-btn:hover { color: var(--error); }
+
+  #sig-type-wrap { display: none; }
+  #sig-type-input {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 100%;
+    color: var(--navy);
+    background: white;
+  }
+  .sig-preview {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    text-align: center;
+    background: #fafbfc;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--navy);
+    min-height: 64px;
+    display: none;
+  }
+
+  /* ── Checkbox ── */
+  .agree-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--blue-light);
+    border-radius: 10px;
+    border: 1px solid var(--blue-mid);
+    cursor: pointer;
+  }
+  .agree-wrap input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin-top: 1px;
+    accent-color: var(--blue);
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+  }
+  .agree-wrap label {
+    font-size: 0.85rem;
+    color: var(--navy-mid);
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.5;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+  .btn {
+    padding: 0.75rem 1.8rem;
+    border-radius: 10px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--navy);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* ── Summary table ── */
+  .summary-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  .summary-table td {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .summary-table td:first-child { font-weight: 600; color: var(--muted); width: 42%; }
+  .summary-table td:last-child { color: var(--navy); }
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  /* ── Success ── */
+  #success-view {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+  .success-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--success), #059669);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes pop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .success-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+  }
+  .success-sub { color: var(--muted); font-size: 0.95rem; line-height: 1.6; max-width: 400px; margin: 0 auto; }
+
+  /* ── Animations ── */
+  .step-view { display: none; animation: fadeIn 0.25s ease; }
+  .step-view.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Info pill ── */
+  .info-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-light);
+    border: 1px solid var(--blue-mid);
+    color: #1d4ed8;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 500px) {
+    .field-group { grid-template-columns: 1fr; }
+    header { padding: 0 1rem; }
+    main { padding: 0 1rem 4rem; }
+    .card { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">JAYISAAC <span>AI AUTOMATION</span></div>
+  <div class="badge">Contractor Onboarding</div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="steps">
+      <div class="step active" id="s1">
+        <div class="step-num">1</div>
+        <div class="step-label">Your Info</div>
+      </div>
+      <div class="step" id="s2">
+        <div class="step-num">2</div>
+        <div class="step-label">Review Docs</div>
+      </div>
+      <div class="step" id="s3">
+        <div class="step-num">3</div>
+        <div class="step-label">Sign</div>
+      </div>
+      <div class="step" id="s4">
+        <div class="step-num">4</div>
+        <div class="step-label">Confirm</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- STEP 1: Info -->
+  <div class="step-view active" id="view-1">
+    <div class="card">
+      <div class="card-title">Let's get started</div>
+      <div class="card-sub">Please fill in your details below. This information will appear on your contractor documents.</div>
+
+      <div class="field-group">
+        <div>
+          <label>First Name *</label>
+          <input type="text" id="fname" placeholder="e.g. Alex">
+        </div>
+        <div>
+          <label>Last Name *</label>
+          <input type="text" id="lname" placeholder="e.g. Johnson">
+        </div>
+      </div>
+      <div class="field-group">
+        <div>
+          <label>Email Address *</label>
+          <input type="email" id="email" placeholder="you@example.com">
+        </div>
+        <div>
+          <label>Phone Number *</label>
+          <input type="tel" id="phone" placeholder="(306) 555-0100">
+        </div>
+      </div>
+      <div class="field-group full">
+        <div>
+          <label>Home Address *</label>
+          <input type="text" id="address" placeholder="123 Main St, Saskatoon, SK">
+        </div>
+      </div>
+      <div class="field-group">
+        <div>
+          <label>Start Date *</label>
+          <input type="date" id="startdate">
+        </div>
+        <div>
+          <label>How did you hear about us?</label>
+          <select id="source">
+            <option value="">Select...</option>
+            <option>Job posting</option>
+            <option>Referral</option>
+            <option>Social media</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <span style="font-size:0.82rem; color: var(--muted);">* Required fields</span>
+      <button class="btn btn-primary" onclick="goToStep(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Documents -->
+  <div class="step-view" id="view-2">
+    <div class="card">
+      <div class="card-title">Review Your Documents</div>
+      <div class="card-sub">Please read through all three agreements before signing. Click "Review" on each one to mark it as read.</div>
+
+      <div class="doc-list">
+        <div class="doc-item" id="doc1">
+          <div class="doc-left">
+            <div class="doc-icon">📄</div>
+            <div>
+              <div class="doc-name">Independent Contractor Agreement</div>
+              <div class="doc-desc">Your role, services, status & termination terms</div>
+            </div>
+          </div>
+          <button class="review-btn" onclick="markReviewed('doc1')">Review</button>
+          <div class="reviewed-badge">✅ Reviewed</div>
+        </div>
+
+        <div class="doc-item" id="doc2">
+          <div class="doc-left">
+            <div class="doc-icon">💰</div>
+            <div>
+              <div class="doc-name">Commission Plan Agreement</div>
+              <div class="doc-desc">25% commission, bi-weekly pay, dispute process</div>
+            </div>
+          </div>
+          <button class="review-btn" onclick="markReviewed('doc2')">Review</button>
+          <div class="reviewed-badge">✅ Reviewed</div>
+        </div>
+
+        <div class="doc-item" id="doc3">
+          <div class="doc-left">
+            <div class="doc-icon">🔒</div>
+            <div>
+              <div class="doc-name">Non-Disclosure & Confidentiality Agreement</div>
+              <div class="doc-desc">Client data, scripts & business info protection</div>
+            </div>
+          </div>
+          <button class="review-btn" onclick="markReviewed('doc3')">Review</button>
+          <div class="reviewed-badge">✅ Reviewed</div>
+        </div>
+      </div>
+
+      <div id="review-notice" style="margin-top:1rem; font-size:0.83rem; color:var(--muted); text-align:center; display:none;">
+        Please review all documents to continue
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-primary" id="docs-next-btn" onclick="goToStep(3)" disabled>Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Signature -->
+  <div class="step-view" id="view-3">
+    <div class="card">
+      <div class="card-title">Sign Your Documents</div>
+      <div class="card-sub">By signing below, you confirm you have read and agree to all three agreements provided by JAYISAAC AI AUTOMATION.</div>
+
+      <div class="sig-tabs">
+        <button class="sig-tab active" onclick="setSigMode('draw', event)">✍️ Draw</button>
+        <button class="sig-tab" onclick="setSigMode('type', event)">⌨️ Type</button>
+      </div>
+
+      <div id="sig-canvas-wrap">
+        <canvas id="sig-canvas"></canvas>
+        <div class="canvas-hint" id="canvas-hint">Sign here with your mouse or finger</div>
+      </div>
+      <div class="sig-actions">
+        <button class="clear-btn" onclick="clearSig()">Clear signature</button>
+      </div>
+
+      <div id="sig-type-wrap">
+        <input type="text" id="sig-type-input" placeholder="Type your full name" oninput="updateTypedSig()">
+        <div class="sig-preview" id="sig-preview"></div>
+      </div>
+
+      <div class="agree-wrap">
+        <input type="checkbox" id="agree-check">
+        <label for="agree-check">I, <strong id="signer-name-display">the Contractor</strong>, agree that my electronic signature is legally binding and constitutes my acceptance of all three documents listed above, including the Independent Contractor Agreement, Commission Plan Agreement, and Non-Disclosure Agreement.</label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goToStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(4)">Review & Submit →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Confirm -->
+  <div class="step-view" id="view-4">
+    <div class="card">
+      <div class="card-title">Review & Confirm</div>
+      <div class="card-sub">Please review your details one final time before submitting.</div>
+
+      <div class="info-pill">ℹ️ Your submission is final — make sure everything looks correct</div>
+
+      <table class="summary-table" id="summary-table"></table>
+
+      <div class="divider"></div>
+
+      <div style="padding: 1rem; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
+        <div style="font-weight: 600; font-size: 0.88rem; color: #065f46; margin-bottom: 4px;">✅ All three documents reviewed & signed</div>
+        <div style="font-size: 0.82rem; color: #047857;">Independent Contractor Agreement · Commission Plan Agreement · Non-Disclosure Agreement</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goToStep(3)">← Back</button>
+      <button class="btn btn-primary" onclick="submitForm()">Submit & Complete ✓</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="success-view">
+    <div class="success-icon">✓</div>
+    <div class="success-title">You're all set!</div>
+    <p class="success-sub">Your documents have been signed and submitted to JAYISAAC AI AUTOMATION. Jay Turner will be in touch shortly with next steps.</p>
+    <div style="margin-top: 2rem; font-size: 0.83rem; color: var(--muted);">Submitted on <span id="submit-timestamp"></span></div>
+  </div>
+
+</main>
+
+<!-- Modal for doc review -->
+<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:white; border-radius:16px; max-width:560px; width:100%; padding:2rem; max-height:90vh; overflow-y:auto; position:relative;">
+    <button onclick="closeModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--muted);">×</button>
+    <div id="modal-content"></div>
+    <button class="btn btn-primary" style="margin-top:1.5rem; width:100%; justify-content:center;" onclick="confirmReview()">✓ I have read this document</button>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+let currentDocId = null;
+let sigMode = 'draw';
+let isDrawing = false;
+let hasSig = false;
+let ctx;
+
+const docContent = {
+  doc1: {
+    title: "Independent Contractor Agreement",
+    body: `<p style="margin-bottom:1rem; line-height:1.7; font-size:0.9rem; color:#334155;">This Agreement is between <strong>JAYISAAC AI AUTOMATION</strong> ("Company"), represented by Jay Turner, Founder, and you ("Contractor").</p>
+    <p style="margin-bottom:0.8rem; font-weight:600; color:#0f172a;">Key Terms:</p>
+    <ul style="font-size:0.88rem; line-height:1.8; color:#334155; padding-left:1.2rem;">
+      <li>You are engaged as an <strong>independent contractor</strong>, not an employee</li>
+      <li>You will provide outbound sales services</li>
+      <li>You are responsible for your own taxes and equipment</li>
+      <li>Compensation is <strong>commission-only at 25%</strong> of net revenue per closed sale</li>
+      <li>Commissions are paid <strong>bi-weekly</strong></li>
+      <li>A performance review occurs at <strong>30 days</strong></li>
+      <li>Either party may terminate with 7 days written notice</li>
+      <li>Governed by the laws of Saskatchewan, Canada</li>
+    </ul>`
+  },
+  doc2: {
+    title: "Commission Plan Agreement",
+    body: `<p style="margin-bottom:1rem; line-height:1.7; font-size:0.9rem; color:#334155;">This Plan outlines how you earn and receive commission payments from JAYISAAC AI AUTOMATION.</p>
+    <p style="margin-bottom:0.8rem; font-weight:600; color:#0f172a;">Commission Structure:</p>
+    <ul style="font-size:0.88rem; line-height:1.8; color:#334155; padding-left:1.2rem;">
+      <li><strong>Rate:</strong> 25% of net revenue per closed sale</li>
+      <li><strong>Trigger:</strong> Commission paid after client payment is received</li>
+      <li><strong>Payment:</strong> Bi-weekly, within 5 business days of period end</li>
+      <li><strong>No base salary</strong> — commission only</li>
+      <li>Refunded sales result in deductions from future commissions</li>
+      <li>Disputes must be raised within 14 days of payment</li>
+      <li>Upon termination, only closed/paid sales are eligible for commission</li>
+    </ul>`
+  },
+  doc3: {
+    title: "Non-Disclosure & Confidentiality Agreement",
+    body: `<p style="margin-bottom:1rem; line-height:1.7; font-size:0.9rem; color:#334155;">This Agreement protects the confidential information of JAYISAAC AI AUTOMATION during and after your engagement.</p>
+    <p style="margin-bottom:0.8rem; font-weight:600; color:#0f172a;">Confidential Information includes:</p>
+    <ul style="font-size:0.88rem; line-height:1.8; color:#334155; padding-left:1.2rem;">
+      <li>Client names and contact lists</li>
+      <li>Sales scripts and call frameworks</li>
+      <li>Pricing structures and deal terms</li>
+      <li>Business strategies and financial information</li>
+    </ul>
+    <p style="margin-top:0.8rem; margin-bottom:0.8rem; font-weight:600; color:#0f172a;">Your Obligations:</p>
+    <ul style="font-size:0.88rem; line-height:1.8; color:#334155; padding-left:1.2rem;">
+      <li>Keep all confidential info strictly private</li>
+      <li>Non-solicitation of clients for 12 months post-termination</li>
+      <li>Return or destroy all company materials upon termination</li>
+      <li>This agreement survives for 2 years after termination</li>
+    </ul>`
+  }
+};
+
+function goToStep(n) {
+  if (n === 2 && !validateStep1()) return;
+  if (n === 4 && !validateStep3()) return;
+
+  document.getElementById('view-' + currentStep)?.classList.remove('active');
+  document.getElementById('view-' + n)?.classList.add('active');
+
+  // Update progress
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('s' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+
+  if (n === 4) buildSummary();
+  if (n === 3) { hasSig = false; setTimeout(() => initCanvas(), 50); }
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep1() {
+  const fields = ['fname', 'lname', 'email', 'phone', 'address', 'startdate'];
+  let ok = true;
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('error');
+    const val = el.value ? el.value.trim() : '';
+    if (!val) { el.classList.add('error'); ok = false; }
+  });
+  if (!ok) { alert('Please fill in all required fields.'); }
+  else {
+    const name = document.getElementById('fname').value.trim() + ' ' + document.getElementById('lname').value.trim();
+    document.getElementById('signer-name-display').textContent = name;
+  }
+  return ok;
+}
+
+function validateStep3() {
+  if (!hasSig && sigMode === 'draw') {
+    alert('Please provide your signature before continuing.');
+    return false;
+  }
+  if (sigMode === 'type' && !document.getElementById('sig-type-input').value.trim()) {
+    alert('Please type your name as your signature.');
+    return false;
+  }
+  if (!document.getElementById('agree-check').checked) {
+    alert('Please check the agreement box to confirm your signature.');
+    return false;
+  }
+  return true;
+}
+
+// Document review
+let reviewedDocs = {};
+function markReviewed(id) {
+  currentDocId = id;
+  const data = docContent[id];
+  document.getElementById('modal-content').innerHTML = `
+    <div style="font-family:'DM Serif Display',serif; font-size:1.3rem; color:#0f172a; margin-bottom:1rem;">${data.title}</div>
+    ${data.body}
+  `;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+function confirmReview() {
+  reviewedDocs[currentDocId] = true;
+  document.getElementById(currentDocId).classList.add('reviewed');
+  closeModal();
+  if (Object.keys(reviewedDocs).length === 3) {
+    document.getElementById('docs-next-btn').disabled = false;
+  }
+}
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Signature canvas
+function initCanvas() {
+  const canvas = document.getElementById('sig-canvas');
+  const wrap = document.getElementById('sig-canvas-wrap');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = wrap.getBoundingClientRect();
+  const w = rect.width || 640;
+  const h = 140;
+
+  canvas.style.width = '100%';
+  canvas.style.height = h + 'px';
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+
+  ctx = canvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  canvas.removeEventListener('mousedown', startDraw);
+  canvas.removeEventListener('mousemove', draw);
+  canvas.removeEventListener('mouseup', endDraw);
+  canvas.removeEventListener('mouseleave', endDraw);
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e.touches[0]); }, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+}
+
+function getPos(e) {
+  const r = document.getElementById('sig-canvas').getBoundingClientRect();
+  return { x: (e.clientX || e.pageX) - r.left, y: (e.clientY || e.pageY) - r.top };
+}
+function startDraw(e) { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+function draw(e) {
+  if (!isDrawing) return;
+  hasSig = true;
+  document.getElementById('canvas-hint').style.opacity = '0';
+  const p = getPos(e);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+}
+function endDraw() { isDrawing = false; }
+function clearSig() {
+  const canvas = document.getElementById('sig-canvas');
+  ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+  hasSig = false;
+  document.getElementById('canvas-hint').style.opacity = '1';
+}
+
+function setSigMode(mode, e) {
+  sigMode = mode;
+  document.querySelectorAll('.sig-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('sig-canvas-wrap').style.display = mode === 'draw' ? 'block' : 'none';
+  document.getElementById('sig-type-wrap').style.display = mode === 'type' ? 'block' : 'none';
+}
+
+function updateTypedSig() {
+  const val = document.getElementById('sig-type-input').value;
+  const preview = document.getElementById('sig-preview');
+  preview.textContent = val;
+  preview.style.display = val ? 'block' : 'none';
+}
+
+function buildSummary() {
+  const rows = [
+    ['Full Name', (document.getElementById('fname').value + ' ' + document.getElementById('lname').value)],
+    ['Email', document.getElementById('email').value],
+    ['Phone', document.getElementById('phone').value],
+    ['Address', document.getElementById('address').value],
+    ['Start Date', document.getElementById('startdate').value],
+    ['Commission Rate', '25% per closed sale'],
+    ['Payment Schedule', 'Bi-weekly'],
+    ['Performance Review', '30 days from start date'],
+    ['Contract Type', 'Independent Contractor'],
+  ];
+  document.getElementById('summary-table').innerHTML = rows.map(([k, v]) =>
+    `<tr><td>${k}</td><td>${v}</td></tr>`
+  ).join('');
+}
+
+let submitted = false;
+function submitForm() {
+  if (submitted) return;
+  submitted = true;
+
+  // Grab the success view BEFORE destroying the DOM
+  const successHTML = document.getElementById('success-view').outerHTML;
+  const timestamp = new Date().toLocaleString('en-CA', { dateStyle: 'long', timeStyle: 'short' });
+
+  document.querySelectorAll('.step-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+
+  const main = document.querySelector('main');
+  main.innerHTML = successHTML;
+
+  // Now safe to access the newly inserted element
+  const sv = document.getElementById('success-view');
+  sv.style.display = 'block';
+  document.getElementById('submit-timestamp').textContent = timestamp;
+}
+
+window.addEventListener('load', () => {
+  // Set today as default start date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('startdate').value = today;
+});
+</script>
+
+</body>
+</html>
