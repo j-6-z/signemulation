@@ -312,34 +312,60 @@
   .agree-wrap {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 14px;
     margin-top: 1.5rem;
-    padding: 1rem;
-    background: var(--blue-light);
-    border-radius: 10px;
-    border: 1px solid var(--blue-mid);
+    padding: 1.25rem 1.5rem;
+    background: white;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
     cursor: pointer;
+    transition: border-color 0.2s;
   }
+  .agree-wrap:hover { border-color: var(--blue); }
+  .agree-wrap.checked { border-color: var(--success); background: #f0fdf4; }
+
+  /* Custom checkbox */
   .agree-wrap input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
     width: 20px;
     height: 20px;
     min-width: 20px;
     margin-top: 1px;
-    accent-color: var(--blue);
-    flex-shrink: 0;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: white;
     cursor: pointer;
+    flex-shrink: 0;
     position: relative;
-    z-index: 2;
+    transition: all 0.15s;
+  }
+  .agree-wrap input[type="checkbox"]:checked {
+    background: var(--success);
+    border-color: var(--success);
+  }
+  .agree-wrap input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
   }
   .agree-wrap label {
-    font-size: 0.85rem;
-    color: var(--navy-mid);
+    font-size: 0.84rem;
+    color: var(--muted);
     font-weight: 400;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.6;
     cursor: pointer;
     user-select: none;
   }
+  .agree-wrap label strong { color: var(--navy); }
 
   /* ── Buttons ── */
   .btn-row {
@@ -616,9 +642,9 @@
         <div class="sig-preview" id="sig-preview"></div>
       </div>
 
-      <div class="agree-wrap">
-        <input type="checkbox" id="agree-check">
-        <label for="agree-check">I, <strong id="signer-name-display">the Contractor</strong>, agree that my electronic signature is legally binding and constitutes my acceptance of all three documents listed above, including the Independent Contractor Agreement, Commission Plan Agreement, and Non-Disclosure Agreement.</label>
+      <div class="agree-wrap" id="agree-wrap">
+        <input type="checkbox" id="agree-check" onchange="document.getElementById('agree-wrap').classList.toggle('checked', this.checked)">
+        <label for="agree-check">I, <strong id="signer-name-display">the Contractor</strong>, confirm that my electronic signature above is legally binding and constitutes my full acceptance of all three agreements — the Independent Contractor Agreement, Commission Plan Agreement, and Non-Disclosure Agreement.</label>
       </div>
     </div>
     <div class="btn-row">
